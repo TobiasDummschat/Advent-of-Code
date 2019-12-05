@@ -1,4 +1,4 @@
-# Day 1 of the Advent of Code 2019
+# Day 1 part 1 of the Advent of Code 2019
 
 # read the puzzle input from a file and split into single lines
 with open("day1_input", "r") as file:
