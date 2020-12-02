@@ -47,6 +47,9 @@ func twoNumbers(n int, input []int) {
 			return
 		case !search && lastTooSmall != nowTooSmall:
 			row++
+			if !nowTooSmall {
+				col--
+			}
 			search = true
 		case nowTooSmall:
 			col++
@@ -88,6 +91,9 @@ func threeNumbers(n int, input []int) {
 				return
 			case !search && lastTooSmall != nowTooSmall:
 				y++
+				if !nowTooSmall {
+					z--
+				}
 				search = true
 			case nowTooSmall:
 				z++
