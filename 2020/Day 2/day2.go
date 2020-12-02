@@ -14,6 +14,10 @@ type entry struct {
 
 func main() {
 	input := readInput("2020\\Day 2\\day2_input")
+	oldRules(input)
+}
+
+func oldRules(input []entry) {
 	var validEntries []entry
 	for _, e := range input {
 		re := regexp.MustCompile(e.character)
