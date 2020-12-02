@@ -15,6 +15,7 @@ type entry struct {
 func main() {
 	input := readInput("2020\\Day 2\\day2_input")
 	oldRules(input)
+	newRules(input)
 }
 
 func oldRules(input []entry) {
@@ -26,7 +27,20 @@ func oldRules(input []entry) {
 			validEntries = append(validEntries, e)
 		}
 	}
-	fmt.Printf("%d of the %d password entries are valid.", len(validEntries), len(input))
+	fmt.Printf("%d of the %d password entries are valid under the old rules.\n", len(validEntries), len(input))
+}
+
+func newRules(input []entry) {
+	var validEntries []entry
+	for _, e := range input {
+		pos1 := []byte(e.password)[e.min-1]
+		pos2 := []byte(e.password)[e.max-1]
+		char := []byte(e.character)[0]
+		if (char == pos1) != (char == pos2) {
+			validEntries = append(validEntries, e)
+		}
+	}
+	fmt.Printf("%d of the %d password entries are valid under the old rules.\n", len(validEntries), len(input))
 }
 
 func readInput(path string) (result []entry) {
