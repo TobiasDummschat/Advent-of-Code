@@ -9,10 +9,22 @@ import (
 func main() {
 	trees := readInput("2020\\Day 3\\day3_input")
 	part1(trees)
+	part2(trees)
 }
 
 func part1(trees [][]bool) {
+	fmt.Println("Part 1:")
 	countTreesOnSlope(trees, 3, 1)
+}
+
+func part2(trees [][]bool) {
+	fmt.Println("Part 2:")
+	product := countTreesOnSlope(trees, 1, 1)
+	product *= countTreesOnSlope(trees, 3, 1)
+	product *= countTreesOnSlope(trees, 5, 1)
+	product *= countTreesOnSlope(trees, 7, 1)
+	product *= countTreesOnSlope(trees, 1, 2)
+	fmt.Printf("Product of found trees: %d", product)
 }
 
 func countTreesOnSlope(trees [][]bool, right, down int) (count int) {
