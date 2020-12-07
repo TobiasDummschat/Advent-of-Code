@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	input := readAndSortInput("2020\\day1_input")
+	input := readAndSortInput("2020\\Day 1\\day1_input")
 	twoNumbers(2020, input)
 	threeNumbers(2020, input)
 }
