@@ -59,6 +59,11 @@ func twoNumbers(n int, input []int) {
 			search = false
 		}
 		lastTooSmall = nowTooSmall
+		if col >= len(input) {
+			row++
+			col = len(input) - 1
+			search = true
+		}
 	}
 	fmt.Printf("No pair summing to %d found in %d tries.", n, tries)
 }
