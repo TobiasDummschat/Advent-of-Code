@@ -40,46 +40,38 @@ func (thisArea Area) equals(area Area) bool {
 
 func main() {
 	area := parseInput("2020\\Day 11\\day11_input")
-	part1Areas := iterateUntilConstant(area)
+	part1Areas := findEquilibrium(area, adjacentOccupiedCounter, 4)
+	part2Areas := findEquilibrium(area, visibleOccupiedCounter, 5)
 
 	writeGifToFile(areasToGIF(part1Areas), "2020\\Day 11\\part1.gif")
+	writeGifToFile(areasToGIF(part2Areas), "2020\\Day 11\\part2.gif")
 }
 
-func iterateUntilConstant(area Area) (areas []Area) {
+func findEquilibrium(area Area, nearbyOccupiedCounter func(Area, int, int) int, tooManyPeople int) (areas []Area) {
 	iterations := 0
 	areas = append(areas, area)
 
-	oldArea, newArea := area, iterate(area)
+	oldArea, newArea := area, iterate(area, nearbyOccupiedCounter, tooManyPeople)
 	for !oldArea.equals(newArea) {
 		iterations++
 		areas = append(areas, newArea)
-		oldArea, newArea = newArea, iterate(newArea)
+		oldArea, newArea = newArea, iterate(newArea, nearbyOccupiedCounter, tooManyPeople)
 	}
 
-	fmt.Printf("Area constant after %d iterations with %d occupied seats in state:\n%v",
+	fmt.Printf("\nArea constant after %d iterations with %d occupied seats in state:\n%v",
 		iterations, countAllOccupied(oldArea), oldArea)
 	return areas
 }
 
-func writeGifToFile(areaGif *gif.GIF, path string) {
-	file, err := os.Create(path)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		gif.EncodeAll(file, areaGif)
-		file.Close()
-	}
-}
-
-func iterate(oldArea Area) Area {
+func iterate(oldArea Area, nearbyOccupiedCounter func(Area, int, int) int, tooManyPeople int) Area {
 	newArea := make([][]Position, len(oldArea))
 	for i, row := range oldArea {
 		newArea[i] = make([]Position, len(row))
 		for j, pos := range row {
-			count := nearbyOccupied(oldArea, i, j)
+			count := nearbyOccupiedCounter(oldArea, i, j)
 			if pos == EmptySeat && count == 0 {
 				newArea[i][j] = OccupiedSeat
-			} else if pos == OccupiedSeat && count >= 4 {
+			} else if pos == OccupiedSeat && count >= tooManyPeople {
 				newArea[i][j] = EmptySeat
 			} else {
 				newArea[i][j] = oldArea[i][j]
@@ -89,7 +81,7 @@ func iterate(oldArea Area) Area {
 	return newArea
 }
 
-func nearbyOccupied(area Area, row, col int) (count int) {
+func adjacentOccupiedCounter(area Area, row, col int) (count int) {
 	for i := row - 1; i <= row+1; i++ {
 		for j := col - 1; j <= col+1; j++ {
 			if i == row && j == col {
@@ -98,6 +90,25 @@ func nearbyOccupied(area Area, row, col int) (count int) {
 				continue
 			} else if area[i][j] == OccupiedSeat {
 				count++
+			}
+		}
+	}
+	return count
+}
+
+func visibleOccupiedCounter(area Area, row, col int) (count int) {
+	directions := [][]int{{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}}
+	for _, d := range directions {
+		i, j := row+d[0], col+d[1]
+		for 0 <= i && 0 <= j && i < len(area) && j < len(area[i]) {
+			pos := area[i][j]
+			if pos == OccupiedSeat {
+				count++
+				break
+			} else if pos == EmptySeat {
+				break
+			} else {
+				i, j = i+d[0], j+d[1]
 			}
 		}
 	}
@@ -183,4 +194,20 @@ func areaToImage(area Area) *image.Paletted {
 	}
 
 	return img
+}
+
+func writeGifToFile(areaGif *gif.GIF, path string) {
+	file, err := os.Create(path)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		err1 := gif.EncodeAll(file, areaGif)
+		err2 := file.Close()
+		if err1 != nil {
+			fmt.Println(err1)
+		}
+		if err2 != nil {
+			fmt.Println(err1)
+		}
+	}
 }
