@@ -8,16 +8,16 @@ import (
 )
 
 type Point struct {
-	x, y, z int
+	x, y, z, w int
 }
 
 type Grid map[Point]bool // grid of active points. a map and not a list for easier lookup, if a point is inactive
 
-func cycle(grid Grid, times int) Grid {
+func cycle(grid Grid, times, dim int) Grid {
 	for c := 0; c < times; c++ {
-		activeNeighborCount := countActiveNeighbors(grid)
+		activeNeighborCount := countActiveNeighbors(grid, dim)
 		grid = nextGrid(grid, activeNeighborCount)
-		fmt.Printf("After %d cycles the grid contains %d active cubes.\n", c+1, len(grid))
+		fmt.Printf("After %d cycles using %d dimensions the grid contains %d active cubes.\n", c+1, dim, len(grid))
 	}
 	return grid
 }
@@ -42,7 +42,7 @@ func nextGrid(grid Grid, activeNeighborCount map[Point]int) map[Point]bool {
 }
 
 // counts the active neighbors of each point that has active neighbors or is active itself
-func countActiveNeighbors(grid Grid) map[Point]int {
+func countActiveNeighbors(grid Grid, dim int) map[Point]int {
 	activeNeighborCount := make(map[Point]int)
 	for point, active := range grid {
 		if active {
@@ -53,7 +53,7 @@ func countActiveNeighbors(grid Grid) map[Point]int {
 			}
 
 			// increment counts for neighbors
-			for _, neighbor := range point.getNeighbors() {
+			for _, neighbor := range point.getNeighbors(dim) {
 				activeNeighborCount[neighbor]++
 			}
 		}
@@ -61,12 +61,18 @@ func countActiveNeighbors(grid Grid) map[Point]int {
 	return activeNeighborCount
 }
 
-func (p Point) getNeighbors() (neighbors []Point) {
+func (p Point) getNeighbors(dim int) (neighbors []Point) {
 	for dx := -1; dx <= 1; dx++ {
 		for dy := -1; dy <= 1; dy++ {
 			for dz := -1; dz <= 1; dz++ {
-				if !(dx == 0 && dy == 0 && dz == 0) {
-					neighbors = append(neighbors, Point{p.x + dx, p.y + dy, p.z + dz})
+				if dim == 3 && !(dx == 0 && dy == 0 && dz == 0) {
+					neighbors = append(neighbors, Point{x: p.x + dx, y: p.y + dy, z: p.z + dz})
+				} else if dim == 4 {
+					for dw := -1; dw <= 1; dw++ {
+						if !(dx == 0 && dy == 0 && dz == 0 && dw == 0) {
+							neighbors = append(neighbors, Point{x: p.x + dx, y: p.y + dy, z: p.z + dz, w: p.w + dw})
+						}
+					}
 				}
 			}
 		}
@@ -76,19 +82,19 @@ func (p Point) getNeighbors() (neighbors []Point) {
 
 func main() {
 	grid := parseInput("2020\\Day 17\\day17_input")
-	cycle(grid, 6)
+	cycle(grid, 6, 3)
+	cycle(grid, 6, 4)
 }
 
 func parseInput(path string) (grid Grid) {
 	grid = make(map[Point]bool)
 	contents, _ := ioutil.ReadFile(path)
 	lines := strings.Split(string(contents), "\r\n")
-	z := 0
 	for x, line := range lines {
 		chars := strings.Split(line, "")
 		for y, char := range chars {
 			if char == "#" {
-				grid[Point{x, y, z}] = true
+				grid[Point{x: x, y: y}] = true // z and w default to 0
 			} else if char != "." {
 				log.Panicf("Unknown character '%s' in line %d at position %d.", char, x, y)
 			}
