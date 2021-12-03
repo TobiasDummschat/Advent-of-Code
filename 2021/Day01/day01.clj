@@ -1,22 +1,26 @@
 (require '[clojure.string])
 
 (defn- get-input  []
-  (let [file (slurp ".\\day01.txt")
-        str-list (clojure.string/split file #"\r|\n|\r\n")]
-    (map #(Integer/parseInt %)
-         (filter #(not= "" %) str-list))))
+  (let [file (slurp "day01.txt")
+        str-list (clojure.string/split file #"\r|\n|\r\n")
+        clean-str-list (filter #(not= "" %) str-list)]
+    (for [s clean-str-list] (Integer/parseInt s))))
 
 (defn how-many-increases [heights]
   (get (reduce (fn [[sum prev] curr]
-            [(if (and (not= prev nil) 
-                      (> curr prev)) 
-               (+ sum 1) 
-               sum) 
-             curr])
-          [0 nil] heights) 0))
+                 [(if (and (not= prev nil)
+                           (> curr prev))
+                    (+ sum 1)
+                    sum)
+                  curr])
+               [0 nil] heights) 0))
 
-(comment
-  (get-input))
+(defn- add-tuples [input n]
+  (let [in-count (count input)
+        out-count (- in-count n -1)]
+    (for [i (range out-count)]
+      (apply + (subvec input i (+ i n))))))
 
-(printf (str (how-many-increases (get-input))))
-
+(let [input (vec (get-input))]
+  (print "Part 1:" (str (how-many-increases input)))
+  (print "Part 2:" (str (how-many-increases (add-tuples input 3)))))
